@@ -1,0 +1,4 @@
+<plugin>
+  <name>classpath-shrinker</name>
+  <classname>io.github.retronym.classpathshrinker.ClassPathShrinker</classname>
+</plugin>
