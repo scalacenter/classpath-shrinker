@@ -3,6 +3,8 @@ package io.github.retronym.classpathshrinker
 import java.io.File
 import java.net.URI
 
+import scala.annotation.tailrec
+import scala.reflect.io.AbstractFile
 import scala.tools.nsc.classpath.ClassPathFactory
 import scala.tools.nsc.plugins.{Plugin, PluginComponent}
 import scala.tools.nsc.{Global, Phase}
@@ -15,7 +17,7 @@ class ClassPathShrinker(val global: Global) extends Plugin {
   val components = List[PluginComponent](Component)
 
   private object Component extends PluginComponent {
-    val global = ClassPathShrinker.this.global
+    val global: ClassPathShrinker.this.global.type = ClassPathShrinker.this.global
     import global._
 
     override val runsAfter = List("jvm")
@@ -23,12 +25,11 @@ class ClassPathShrinker(val global: Global) extends Plugin {
     val phaseName = ClassPathShrinker.this.name
 
     override def newPhase(prev: Phase): StdPhase = new StdPhase(prev) {
-      override def apply(unit: CompilationUnit) {
-
-        val distinctJars = completedTopLevels.flatMap(x => x.associatedFile.underlyingSource).toSet
-        val usedClasspathStrings = distinctJars.toList.map(_.toString).sorted
+      override def run(): Unit = {
+        super.run()
+        val usedJars = findUsedJars
+        val usedClasspathStrings = usedJars.toList.map(_.toString).sorted
         val userClasspathURLs = new ClassPathFactory(settings).classesInExpandedPath(settings.classpath.value).flatMap(_.asURLs)
-        //        println("\nClasspath:\n" + global.classPath.asClassPathStrings.sorted.mkString("\n"))
         def toJar(u: URI): Option[File] = util.Try { new File(u) }.toOption.filter(_.getName.endsWith(".jar"))
         val userClasspathStrings = userClasspathURLs.flatMap(x => toJar(x.toURI)).map(_.getPath).toList
         val unneededClasspath = userClasspathStrings.filterNot(s => usedClasspathStrings.contains(s))
@@ -36,23 +37,36 @@ class ClassPathShrinker(val global: Global) extends Plugin {
           warning("classpath-shrinker detected the following unused classpath entries: \n" + unneededClasspath.mkString("\n"))
         }
       }
+      override def apply(unit: CompilationUnit): Unit = ()
     }
   }
 
   import global._
 
-  private def walkTopLevels(root: Symbol): Iterator[Symbol] = {
-    def safeInfo(sym: Symbol): Type = if (sym.hasRawInfo && sym.rawInfo.isComplete) sym.info else NoType
-    def packageClassOrSelf(sym: Symbol): Symbol = if (sym.hasPackageFlag && !sym.isModuleClass) sym.moduleClass else sym
+  private def findUsedJars: Set[AbstractFile] = {
+    val jars = collection.mutable.Set[AbstractFile]()
 
-    if (root.hasPackageFlag)
-      safeInfo(packageClassOrSelf(root)).decls.iterator.flatMap(x =>
-        if (x == root) Nil else walkTopLevels(x)
-      ) else Iterator(root)
-  }
+    def walkTopLevels(root: Symbol): Unit = {
+      def safeInfo(sym: Symbol): Type = if (sym.hasRawInfo && sym.rawInfo.isComplete) sym.info else NoType
+      def packageClassOrSelf(sym: Symbol): Symbol = if (sym.hasPackageFlag && !sym.isModuleClass) sym.moduleClass else sym
 
-  private def completedTopLevels: Iterator[Symbol] = {
-    def isFromClasspath(x: Symbol) = x.associatedFile != reflect.io.NoAbstractFile && x.sourceFile == null
-    walkTopLevels(RootClass).filterNot(_.hasPackageFlag).filter(isFromClasspath).filter(x => x.hasRawInfo && x.rawInfo.isComplete)
+      val it = safeInfo(packageClassOrSelf(root)).decls.iterator
+      while (it.hasNext) {
+        val x = it.next()
+        if (x == root) ()
+        else if (x.hasPackageFlag) walkTopLevels(x)
+        else if (x.owner == root) { // exclude package class members
+          if (x.hasRawInfo && x.rawInfo.isComplete) {
+            val assocFile = x.associatedFile
+            if (assocFile.path.endsWith(".class") && assocFile.underlyingSource.isDefined)
+              jars += assocFile.underlyingSource.get
+          }
+        }
+      }
+    }
+    exitingTyper {
+      walkTopLevels(RootClass)
+    }
+    jars.toSet
   }
 }
