@@ -1,28 +1,21 @@
-## Boxer: a demo scalac plugin, embedded in your SBT project.
+## Classpath Shrinker: a scalac plugin to detect unused classpath entries
 
-Ever wish you could inject some extra analysis into the
-compiler pipeline for your project? You could write a compiler
-plugin, package, distribute it, and depend on it, but the
-activation energy for that is pretty high.
+Proof of concept plugin to scan the compiler's symbol table after a full clean
+build in order to find which JARs are on your classpath but are not referred to.
 
-`Boxer` shows you how to embed a custom compiler plugin
-directly into a sub-project of your SBT project. With this
-in place, you can edit the plugin, run compile, and *immediately*
-see the results in the context of your project.
+### Using
 
-### What's inside
- - [SBT Project Definition](https://github.com/retronym/boxer/blob/master/project/build.scala)
- - Compiler Plugin [Descriptor](https://github.com/retronym/boxer/blob/master/plugin/src/main/resources/scalac-plugin.xml) and
-[Sources](https://github.com/retronym/boxer/blob/master/plugin/src/main/scala/demo/DemoPlugin.scala)
+```
+$ sbt package
+> package
+[info] Compiling 1 Scala source to /Users/jz/code/classpath-shrinker/plugin/target/scala-2.12/classes...
+[info] Packaging /Users/jz/code/classpath-shrinker/plugin/target/scala-2.12/classpath-shrinker-plugin_2.12-0.1-SNAPSHOT.jar ...
+[info] Done packaging.
 
-### Sample Output
+$ scalac -Xplugin:/Users/jz/code/classpath-shrinker/plugin/target/scala-2.12/classpath-shrinker-plugin_2.12-0.1-SNAPSHOT.jar \
+         -classpath guava.jar \
+         <sources that don't directly refer to classes in guava.jar>
+warning: classpath-shrinker detected the following unused classpath entries:
+/Users/jz/.ivy2/cache/com.google.guava/guava/bundles/guava-21.0.jar
 
-    [info] Compiling 1 Scala source to /Users/jason/code/boxer/plugin/target/scala-2.9.2/classes...
-    [info] Done updating.
-    [info] Packaging /Users/jason/code/boxer/plugin/target/scala-2.9.2/plugin_2.9.2-0.1-SNAPSHOT.jar ...
-    [info] Done packaging.
-    [info] Compiling 1 Scala source to /Users/jason/code/boxer/main/target/scala-2.9.2/classes...
-    [warn] /Users/jason/code/boxer/main/src/main/scala/demo/Demo.scala:8: Value class `Meter` instantiated!
-    [warn]   println(m2)
-    [warn]           ^
-    [warn] one warning found
+```
