@@ -3,21 +3,21 @@ package io.github.retronym.classpathshrinker
 import java.io.File
 import java.net.URI
 
-import scala.annotation.tailrec
 import scala.reflect.io.AbstractFile
 import scala.tools.nsc.classpath.ClassPathFactory
 import scala.tools.nsc.plugins.{Plugin, PluginComponent}
 import scala.tools.nsc.{Global, Phase}
-import scala.tools.util.PathResolver
 
 class ClassPathShrinker(val global: Global) extends Plugin {
 
   val name = "classpath-shrinker"
-  val description = "Warns about classpath entries that are not directly needed."
+  val description =
+    "Warns about classpath entries that are not directly needed."
   val components = List[PluginComponent](Component)
 
   private object Component extends PluginComponent {
-    val global: ClassPathShrinker.this.global.type = ClassPathShrinker.this.global
+    val global: ClassPathShrinker.this.global.type =
+      ClassPathShrinker.this.global
     import global._
 
     override val runsAfter = List("jvm")
@@ -29,12 +29,19 @@ class ClassPathShrinker(val global: Global) extends Plugin {
         super.run()
         val usedJars = findUsedJars
         val usedClasspathStrings = usedJars.toList.map(_.toString).sorted
-        val userClasspathURLs = new ClassPathFactory(settings).classesInExpandedPath(settings.classpath.value).flatMap(_.asURLs)
-        def toJar(u: URI): Option[File] = util.Try { new File(u) }.toOption.filter(_.getName.endsWith(".jar"))
-        val userClasspathStrings = userClasspathURLs.flatMap(x => toJar(x.toURI)).map(_.getPath).toList
-        val unneededClasspath = userClasspathStrings.filterNot(s => usedClasspathStrings.contains(s))
+        val userClasspathURLs = new ClassPathFactory(settings)
+          .classesInExpandedPath(settings.classpath.value)
+          .flatMap(_.asURLs)
+        def toJar(u: URI): Option[File] =
+          util.Try { new File(u) }.toOption.filter(_.getName.endsWith(".jar"))
+        val userClasspathStrings =
+          userClasspathURLs.flatMap(x => toJar(x.toURI)).map(_.getPath).toList
+        val unneededClasspath =
+          userClasspathStrings.filterNot(s => usedClasspathStrings.contains(s))
         if (unneededClasspath.nonEmpty) {
-          warning("classpath-shrinker detected the following unused classpath entries: \n" + unneededClasspath.mkString("\n"))
+          val unusedEntries = unneededClasspath.mkString("\n")
+          warning(
+            s"Detected the following unused classpath entries: \n$unusedEntries")
         }
       }
       override def apply(unit: CompilationUnit): Unit = ()
@@ -47,8 +54,10 @@ class ClassPathShrinker(val global: Global) extends Plugin {
     val jars = collection.mutable.Set[AbstractFile]()
 
     def walkTopLevels(root: Symbol): Unit = {
-      def safeInfo(sym: Symbol): Type = if (sym.hasRawInfo && sym.rawInfo.isComplete) sym.info else NoType
-      def packageClassOrSelf(sym: Symbol): Symbol = if (sym.hasPackageFlag && !sym.isModuleClass) sym.moduleClass else sym
+      def safeInfo(sym: Symbol): Type =
+        if (sym.hasRawInfo && sym.rawInfo.isComplete) sym.info else NoType
+      def packageClassOrSelf(sym: Symbol): Symbol =
+        if (sym.hasPackageFlag && !sym.isModuleClass) sym.moduleClass else sym
 
       for (x <- safeInfo(packageClassOrSelf(root)).decls) {
         if (x == root) ()

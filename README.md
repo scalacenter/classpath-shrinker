@@ -1,9 +1,17 @@
-## Classpath Shrinker: a scalac plugin to detect unused classpath entries
+## Classpath Shrinker
 
-Proof of concept plugin to scan the compiler's symbol table after a full clean
-build in order to find which JARs are on your classpath but are not referred to.
+The Classpath Shrinker is a scalac plugin to detect unused classpath entries.
+It was created by [Jason Zaugg](https://github.com/retronym) as a better alternative to [a commit](https://github.com/jvican/scala/commit/8d22990ce32d9215f7e1fdd839f00f651b283744)
+which fulfilled the same functionality but required the instrumentation of symbol
+initializers.
 
-### Using
+This plugin is now maintained by [the Scala Center](https://scala.epfl.ch).
+
+The creation of this plugin was motivated by [SCP-009: Improve direct dependency experience](https://github.com/scalacenter/advisoryboard/blob/master/proposals/009-improve-direct-dependency-experience.md),
+and complements the improvements to stub error messages [available in 2.12.2](https://github.com/scala/scala/pull/5724)
+and [2.11.9](https://github.com/scala/scala/issues/5804).
+
+### Usage
 
 ```
 $ sbt package
