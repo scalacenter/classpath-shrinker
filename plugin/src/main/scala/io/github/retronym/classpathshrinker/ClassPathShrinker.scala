@@ -39,9 +39,7 @@ class ClassPathShrinker(val global: Global) extends Plugin {
         val unneededClasspath =
           userClasspathStrings.filterNot(s => usedClasspathStrings.contains(s))
         if (unneededClasspath.nonEmpty) {
-          val unusedEntries = unneededClasspath.mkString("\n")
-          warning(
-            s"Detected the following unused classpath entries: \n$unusedEntries")
+          warning(ClassPathFeedback.createWarningMsg(unneededClasspath))
         }
       }
       override def apply(unit: CompilationUnit): Unit = ()
