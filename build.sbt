@@ -53,8 +53,6 @@ lazy val noPublish = Seq(
   publishLocal := {}
 )
 
-name := "classpath-shrinker"
-
 lazy val root = project.aggregate(plugin, example).settings(commonSettings)
 
 def inCompileAndTest(ss: Setting[_]*): Seq[Setting[_]] =
@@ -64,7 +62,7 @@ val scalaPartialVersion =
   Def.setting(CrossVersion partialVersion scalaVersion.value)
 
 lazy val plugin = project.settings(
-  name := "classpath-shrinker-plugin",
+  name := "classpath-shrinker",
   scalaVersion in ThisBuild := "2.12.1",
   crossScalaVersions in ThisBuild := Seq("2.11.8", "2.12.1"),
   libraryDependencies += "org.scala-lang" % "scala-compiler" % scalaVersion.value,

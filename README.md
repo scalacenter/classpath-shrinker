@@ -1,4 +1,6 @@
 ## Classpath Shrinker
+[![Build Status](https://platform-ci.scala-lang.org/api/badges/scalacenter/classpath-shrinker/status.svg)](https://platform-ci.scala-lang.org/scalacenter/classpath-shrinker)
+[![Maven Central](https://img.shields.io/maven-central/v/ch.epfl.scala/classpath-shrinker_2.12.svg)][search.maven]
 
 The Classpath Shrinker is a scalac plugin to detect unused classpath entries.
 It was originally created by [Jason Zaugg](https://github.com/retronym) as a better alternative to [a commit](https://github.com/jvican/scala/commit/8d22990ce32d9215f7e1fdd839f00f651b283744)
@@ -13,19 +15,22 @@ and [2.11.9](https://github.com/scala/scala/issues/5804).
 
 If you use Pants or Bazel, you may find this compiler plugin useful.
 
-### Use
+### Add to your project
+
+```scala
+resolvers += Resolver.bintrayRepo("scalacenter", "releases")
+addCompilerPlugin("ch.epfl.scala" %% "classpath-shrinker" % "0.1.0")
+```
+
+Once it's added, it will report if there are unused classpath entries automatically.
+
+Output looks like:
 
 ```
-$ sbt package
-> package
-[info] Compiling 1 Scala source to /Users/jz/code/classpath-shrinker/plugin/target/scala-2.12/classes...
-[info] Packaging /Users/jz/code/classpath-shrinker/plugin/target/scala-2.12/classpath-shrinker-plugin_2.12-0.1-SNAPSHOT.jar ...
-[info] Done packaging.
-
-$ scalac -Xplugin:/Users/jz/code/classpath-shrinker/plugin/target/scala-2.12/classpath-shrinker-plugin_2.12-0.1-SNAPSHOT.jar \
-         -classpath guava.jar \
-         <sources that don't directly refer to classes in guava.jar>
-warning: classpath-shrinker detected the following unused classpath entries:
-/Users/jz/.ivy2/cache/com.google.guava/guava/bundles/guava-21.0.jar
-
+[info] Compiling 1 Scala source to /drone/src/github.com/scalacenter/classpath-shrinker/example/target/scala-2.12/classes...
+[warn] Detected the following unused classpath entries: 
+[warn] /.coursier-cache/https/repo1.maven.org/maven2/com/google/guava/guava/21.0/guava-21.0.jar
+[warn] one warning found
 ```
+
+[search.maven]: http://search.maven.org/#search|ga|1|ch.epfl.scala.classpath-shrinker
