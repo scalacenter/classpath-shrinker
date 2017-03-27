@@ -71,7 +71,8 @@ object TestUtil {
     assert(
       existsWarning(expectedWarning, reporter), {
         val errors = prettyPrintErrors(reporter)
-        s"Expected warning does not exist.\nFound:\n$errors\nExpected:\n$expectedWarning"
+        s"Expected warning does not exist." +
+          s"Found:\n$errors\nExpected:\n$expectedWarning"
       }
     )
   }
