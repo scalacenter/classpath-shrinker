@@ -73,4 +73,53 @@ class ClassPathShrinkerSpec {
     val allEntries = usedEntries ++ unusedEntries
     expectWarning(expectedWarning, extraClasspath = allEntries)(testCode)
   }
+
+  @Test
+  def `Nothing is reported when everything is used in nested decl`(): Unit = {
+    val testCode =
+      """object Foo {
+        |  class Bar {
+        |    org.apache.commons.lang3.ArrayUtils.EMPTY_BOOLEAN_ARRAY.length
+        |    com.google.common.base.Strings.commonPrefix("abc", "abcd")
+        |  }
+        |}
+      """.stripMargin
+    val unusedEntries = Seq()
+    val usedEntries = Coursier.getArtifacts(Seq(guava, commons))
+    val expectedWarning = ClassPathFeedback.createWarningMsg(unusedEntries)
+    val allEntries = usedEntries ++ unusedEntries
+    expectWarning(expectedWarning, extraClasspath = allEntries)(testCode)
+  }
+
+  @Test
+  def `Commons is reported when guava is used in nested decl`(): Unit = {
+    val testCode =
+      """object Demo1 {
+        |  class Bar {
+        |    com.google.common.base.Strings.commonPrefix("abc", "abcd")
+        |  }
+        |}
+      """.stripMargin
+    val unusedEntries = Coursier.getArtifacts(Seq(commons))
+    val usedEntries = Coursier.getArtifacts(Seq(guava))
+    val expectedWarning = ClassPathFeedback.createWarningMsg(unusedEntries)
+    val allEntries = usedEntries ++ unusedEntries
+    expectWarning(expectedWarning, extraClasspath = allEntries)(testCode)
+  }
+
+  @Test
+  def `Guava is reported when commons is used in nested decl`(): Unit = {
+    val testCode =
+      """object Demo {
+        |  class Bar {
+        |    org.apache.commons.lang3.ArrayUtils.EMPTY_BOOLEAN_ARRAY.length
+        |  }
+        |}
+      """.stripMargin
+    val unusedEntries = Coursier.getArtifacts(Seq(guava))
+    val usedEntries = Coursier.getArtifacts(Seq(commons))
+    val expectedWarning = ClassPathFeedback.createWarningMsg(unusedEntries)
+    val allEntries = usedEntries ++ unusedEntries
+    expectWarning(expectedWarning, extraClasspath = allEntries)(testCode)
+  }
 }

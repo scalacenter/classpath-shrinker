@@ -3,8 +3,6 @@ package io.github.retronym.classpathshrinker
 import java.io.File
 import java.net.URI
 
-import io.github.retronym.classpathshrinker.Compat
-
 import scala.reflect.io.AbstractFile
 import scala.tools.nsc.plugins.{Plugin, PluginComponent}
 import scala.tools.nsc.{Global, Phase}
