@@ -1,0 +1,23 @@
+pipeline:
+  sftp_cache:
+    image: plugins/sftp-cache
+    restore: true
+    mount:
+      - /drone/.ivy2
+      - /drone/.coursier-cache
+      - /drone/.sbt
+      - /drone/.git
+
+  build:
+    image: scalacenter/scala-extras:1.0
+    commands:
+      - sbt plugin/test example/compile
+
+  sftp_cache:
+    image: plugins/sftp-cache
+    rebuild: true
+    mount:
+      - /drone/.ivy2
+      - /drone/.coursier-cache
+      - /drone/.sbt
+      - /drone/.git
