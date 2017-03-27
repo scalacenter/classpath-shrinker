@@ -8,6 +8,19 @@ pipeline:
       - /drone/.sbt
       - /drone/.git
 
+  notify:
+    image: drillster/drone-email
+    host: smtp.mailgun.org
+    username: noreply@drone.geirsson.com
+    password: ${MAILGUN_PASSWORD}
+    from: noreply@drone.geirsson.com
+    recipients:
+      - jorgevc@fastmail.es
+    when:
+      event: push
+      branch: [master]
+      status: [changed, failure]
+
   build:
     image: scalacenter/scala-extras:1.0
     commands:
