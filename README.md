@@ -1,7 +1,7 @@
 ## Classpath Shrinker
 
 The Classpath Shrinker is a scalac plugin to detect unused classpath entries.
-It was created by [Jason Zaugg](https://github.com/retronym) as a better alternative to [a commit](https://github.com/jvican/scala/commit/8d22990ce32d9215f7e1fdd839f00f651b283744)
+It was originally created by [Jason Zaugg](https://github.com/retronym) as a better alternative to [a commit](https://github.com/jvican/scala/commit/8d22990ce32d9215f7e1fdd839f00f651b283744)
 which fulfilled the same functionality but required the instrumentation of symbol
 initializers.
 
@@ -11,7 +11,9 @@ The creation of this plugin was motivated by [SCP-009: Improve direct dependency
 and complements the improvements to stub error messages [available in 2.12.2](https://github.com/scala/scala/pull/5724)
 and [2.11.9](https://github.com/scala/scala/issues/5804).
 
-### Usage
+If you use Pants or Bazel, you may find this compiler plugin useful.
+
+### Use
 
 ```
 $ sbt package

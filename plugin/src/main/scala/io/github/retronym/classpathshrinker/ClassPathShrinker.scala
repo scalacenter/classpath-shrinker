@@ -3,12 +3,13 @@ package io.github.retronym.classpathshrinker
 import java.io.File
 import java.net.URI
 
+import io.github.retronym.classpathshrinker.Compat
+
 import scala.reflect.io.AbstractFile
-import scala.tools.nsc.classpath.ClassPathFactory
 import scala.tools.nsc.plugins.{Plugin, PluginComponent}
 import scala.tools.nsc.{Global, Phase}
 
-class ClassPathShrinker(val global: Global) extends Plugin {
+class ClassPathShrinker(val global: Global) extends Plugin with Compat {
 
   val name = "classpath-shrinker"
   val description =
@@ -29,7 +30,8 @@ class ClassPathShrinker(val global: Global) extends Plugin {
         super.run()
         val usedJars = findUsedJars
         val usedClasspathStrings = usedJars.toList.map(_.toString).sorted
-        val userClasspathURLs = new ClassPathFactory(settings)
+        val userClasspath = getClassPathFrom(settings)
+        val userClasspathURLs = userClasspath
           .classesInExpandedPath(settings.classpath.value)
           .flatMap(_.asURLs)
         def toJar(u: URI): Option[File] =

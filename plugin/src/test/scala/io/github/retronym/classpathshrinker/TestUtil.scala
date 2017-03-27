@@ -45,7 +45,7 @@ object TestUtil {
                     reporter: StoreReporter): Boolean = {
     reporter.infos.exists { info =>
       info.severity.id == 1 && info.msg == expectedWarning
-    } || (expectedWarning.isEmpty && reporter.infos.isEmpty)
+    } || (expectedWarning.isEmpty && !reporter.infos.exists(_.severity == 0))
   }
 
   def prettyPrintErrors(reporter: StoreReporter): String = {

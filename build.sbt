@@ -1,12 +1,8 @@
-lazy val root = project.aggregate(plugin, example)
-
-scalaVersion in ThisBuild := "2.12.1"
-
-crossScalaVersions in ThisBuild := Seq("2.11.8", "2.12.1")
-
-organization in ThisBuild := "ch.epfl.scala"
-
-name := "classpath-shrinker"
+lazy val commonSettings = Seq(
+  scalaVersion in ThisBuild := "2.12.1",
+  crossScalaVersions in ThisBuild := Seq("2.11.8", "2.12.1"),
+  organization in ThisBuild := "ch.epfl.scala"
+)
 
 lazy val testDependencies = Seq(
   "junit" % "junit" % "4.12" % "test",
@@ -57,8 +53,20 @@ lazy val noPublish = Seq(
   publishLocal := {}
 )
 
+name := "classpath-shrinker"
+
+lazy val root = project.aggregate(plugin, example).settings(commonSettings)
+
+def inCompileAndTest(ss: Setting[_]*): Seq[Setting[_]] =
+  Seq(Compile, Test).flatMap(inConfig(_)(ss))
+
+val scalaPartialVersion =
+  Def.setting(CrossVersion partialVersion scalaVersion.value)
+
 lazy val plugin = project.settings(
   name := "classpath-shrinker-plugin",
+  scalaVersion in ThisBuild := "2.12.1",
+  crossScalaVersions in ThisBuild := Seq("2.11.8", "2.12.1"),
   libraryDependencies += "org.scala-lang" % "scala-compiler" % scalaVersion.value,
   libraryDependencies ++= testDependencies,
   testOptions in Test ++= List(Tests.Argument("-v"), Tests.Argument("-s")),
@@ -77,7 +85,13 @@ lazy val plugin = project.settings(
     val pluginOptionsFile = resourceDir / "toolbox.plugin"
     IO.write(pluginOptionsFile, stringOptions)
     List(pluginOptionsFile.getAbsoluteFile)
-  }.taskValue
+  }.taskValue,
+  inCompileAndTest(unmanagedSourceDirectories ++= {
+    scalaPartialVersion.value.collect {
+      case (2, y) if y == 11 => new File(scalaSource.value.getPath + "-2.11")
+      case (2, y) if y >= 12 => new File(scalaSource.value.getPath + "-2.12")
+    }.toList
+  })
 )
 
 /* Write all the compile-time dependencies of the spores macro to a file,
