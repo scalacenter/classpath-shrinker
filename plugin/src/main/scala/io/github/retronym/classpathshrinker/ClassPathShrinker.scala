@@ -62,7 +62,7 @@ class ClassPathShrinker(val global: Global) extends Plugin {
       for (x <- safeInfo(packageClassOrSelf(root)).decls) {
         if (x == root) ()
         else if (x.hasPackageFlag) walkTopLevels(x)
-        else if (x.owner == root) { // exclude package class members
+        else if (x.owner != root) { // exclude package class members
           if (x.hasRawInfo && x.rawInfo.isComplete) {
             val assocFile = x.associatedFile
             if (assocFile.path.endsWith(".class") && assocFile.underlyingSource.isDefined)
