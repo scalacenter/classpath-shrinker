@@ -8,8 +8,8 @@ lazy val testDependencies = Seq(
   "junit" % "junit" % "4.12" % "test",
   "com.novocode" % "junit-interface" % "0.11" % "test",
   // Depend on coursier to resolve unused classpath entries
-  "io.get-coursier" %% "coursier" % "1.0.0-M15",
-  "io.get-coursier" %% "coursier-cache" % "1.0.0-M15"
+  "io.get-coursier" %% "coursier" % "1.0.0-M15" % "test",
+  "io.get-coursier" %% "coursier-cache" % "1.0.0-M15" % "test"
 )
 
 lazy val publishSettings = Seq(
