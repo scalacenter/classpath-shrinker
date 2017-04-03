@@ -43,9 +43,16 @@ object TestUtil {
 
   def existsWarning(expectedWarning: String,
                     reporter: StoreReporter): Boolean = {
+    def hasDetectionWarning: Boolean = {
+      reporter.infos.exists { info =>
+        info.severity.id == reporter.WARNING.id &&
+          info.msg.startsWith("Detected the following unused classpath entries")
+      }
+    }
+
     reporter.infos.exists { info =>
-      info.severity.id == 1 && info.msg == expectedWarning
-    } || (expectedWarning.isEmpty && !reporter.infos.exists(_.severity == 0))
+      info.severity.id == reporter.WARNING.id && info.msg == expectedWarning
+    } || (expectedWarning.isEmpty && !hasDetectionWarning)
   }
 
   def prettyPrintErrors(reporter: StoreReporter): String = {
