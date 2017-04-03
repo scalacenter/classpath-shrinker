@@ -27,7 +27,7 @@ class ClassPathShrinker(val global: Global) extends Plugin with Compat {
       override def run(): Unit = {
         super.run()
         val usedJars = findUsedJars
-        val usedClasspathStrings = usedJars.toList.map(_.toString).sorted
+        val usedClasspathStrings = usedJars.toList.map(_.canonicalPath).sorted
         val userClasspath = getClassPathFrom(settings)
         val userClasspathURLs = userClasspath
           .classesInExpandedPath(settings.classpath.value)
@@ -35,7 +35,7 @@ class ClassPathShrinker(val global: Global) extends Plugin with Compat {
         def toJar(u: URI): Option[File] =
           util.Try { new File(u) }.toOption.filter(_.getName.endsWith(".jar"))
         val userClasspathStrings =
-          userClasspathURLs.flatMap(x => toJar(x.toURI)).map(_.getPath).toList
+          userClasspathURLs.flatMap(x => toJar(x.toURI)).map(_.getCanonicalPath).toList
         val unneededClasspath =
           userClasspathStrings.filterNot(s => usedClasspathStrings.contains(s))
         if (unneededClasspath.nonEmpty) {
