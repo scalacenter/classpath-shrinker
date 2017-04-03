@@ -19,7 +19,7 @@ If you use Pants or Bazel, you may find this compiler plugin useful.
 
 ```scala
 resolvers += Resolver.bintrayRepo("scalacenter", "releases")
-addCompilerPlugin("ch.epfl.scala" %% "classpath-shrinker" % "0.1.0")
+addCompilerPlugin("ch.epfl.scala" %% "classpath-shrinker" % "0.1.1")
 ```
 
 Once it's added, it will report if there are unused classpath entries automatically.
