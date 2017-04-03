@@ -269,4 +269,20 @@ class ClassPathShrinkerSpec {
     val allEntries = usedEntries ++ unusedEntries
     expectWarning(expectedWarning, extraClasspath = allEntries)(testCode)
   }
+
+  @Test
+  def `Nothing is reported even if commons has relative path`(): Unit = {
+    val testCode =
+      """package object demo {
+        |  class Bar {
+        |    org.apache.commons.lang3.ArrayUtils.EMPTY_BOOLEAN_ARRAY.length
+        |  }
+        |}
+      """.stripMargin
+    val unusedEntries = Seq()
+    val usedEntries = Coursier.getArtifactsRelative(Seq(commons))
+    val expectedWarning = ClassPathFeedback.createWarningMsg(unusedEntries)
+    val allEntries = usedEntries ++ unusedEntries
+    expectWarning(expectedWarning, extraClasspath = allEntries)(testCode)
+  }
 }

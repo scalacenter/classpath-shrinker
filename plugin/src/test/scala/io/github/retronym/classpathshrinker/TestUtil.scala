@@ -1,5 +1,8 @@
 package io.github.retronym.classpathshrinker
 
+import java.io.File
+import java.nio.file.Paths
+
 import coursier.maven.MavenRepository
 import coursier.{Cache, Dependency, Fetch, Resolution}
 
@@ -90,7 +93,13 @@ object TestUtil {
       MavenRepository("https://repo1.maven.org/maven2")
     )
 
-    def getArtifacts(deps: Seq[Dependency]): Seq[String] = {
+    def getArtifacts(deps: Seq[Dependency]): Seq[String] =
+      getArtifacts(deps, toAbsolutePath)
+
+    def getArtifactsRelative(deps: Seq[Dependency]): Seq[String] =
+      getArtifacts(deps, toRelativePath)
+
+    private def getArtifacts(deps: Seq[Dependency], fileToString: File => String): Seq[String] = {
       val toResolve = Resolution(deps.toSet)
       val fetch = Fetch.from(repositories, Cache.fetch())
       val resolution = toResolve.process.run(fetch).run
@@ -103,7 +112,13 @@ object TestUtil {
       val onlyErrors = errorsOrJars.filter(_.isLeft)
       if (onlyErrors.nonEmpty)
         sys.error(s"Jars could not be fetched from cache:\n$onlyErrors")
-      errorsOrJars.flatMap(_.map(_.getAbsolutePath).toList)
+      errorsOrJars.flatMap(_.map(fileToString).toList)
     }
+
+    private def toAbsolutePath(f: File): String =
+      f.getAbsolutePath
+
+    private def toRelativePath(f: File): String =
+      Paths.get(System.getProperty("user.dir")).relativize(f.toPath).toString
   }
 }
