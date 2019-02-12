@@ -2,6 +2,8 @@
 [![Build Status](https://platform-ci.scala-lang.org/api/badges/scalacenter/classpath-shrinker/status.svg)](https://platform-ci.scala-lang.org/scalacenter/classpath-shrinker)
 [![Maven Central](https://img.shields.io/maven-central/v/ch.epfl.scala/classpath-shrinker_2.12.svg)][search.maven]
 
+(This project is completed and currently not maintained by anyone)
+
 The Classpath Shrinker is a scalac plugin to detect unused classpath entries.
 It was originally created by [Jason Zaugg](https://github.com/retronym) as a better alternative to [a commit](https://github.com/jvican/scala/commit/8d22990ce32d9215f7e1fdd839f00f651b283744)
 which fulfilled the same functionality but required the instrumentation of symbol
