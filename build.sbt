@@ -24,8 +24,7 @@ lazy val publishSettings = Seq(
   publishTo := (publishTo in bintray).value,
   publishArtifact in Test := false,
   licenses := Seq(
-    // Scala Center license... BSD 3-clause
-    "BSD" -> url("http://opensource.org/licenses/BSD-3-Clause")
+    "Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0")
   ),
   homepage := Some(url("https://github.com/scalacenter/classpath-shrinker")),
   autoAPIMappings := true,
